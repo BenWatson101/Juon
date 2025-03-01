@@ -1,6 +1,7 @@
 package JUOM.JHTML;
 
 import java.io.*;
+import java.util.Objects;
 
 public abstract class JHTML {
 
@@ -36,11 +37,23 @@ public abstract class JHTML {
     }
 
 
-    public static JHTML file(String path) throws IOException {
+    public static JHTML file(String path, Class<?> clazz) throws IOException {
 
         StringBuilder html = new StringBuilder();
 
-        BufferedReader reader = new BufferedReader(new FileReader(path));
+//        System.out.println(path);
+//        System.out.println("Absolute path: " + clazz.getResourceAsStream("/" + path));
+//        System.out.println("Relative path: " + clazz.getResourceAsStream(path));;
+//        System.out.println(clazz);
+
+        InputStream e = clazz.getResourceAsStream(path);
+
+        if (e == null) {
+            throw new IOException("File not found");
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(e));
+
 
         String line;
         while((line = reader.readLine()) != null) {

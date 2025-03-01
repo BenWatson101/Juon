@@ -64,6 +64,9 @@ public abstract class Server extends Page {
                 //expecting something like: GET /index HTTP/1.1
                 String[] requestParts = line.split(" ");
                 if (requestParts.length >= 2) {
+
+                    //System.out.println("Request: " + line);
+
                     handleRequest(client, requestParts[0], requestParts[1], line);
                 } else {
                     sendNotFoundResponse(client, "Incorrect request format\n http request: " + line);
@@ -79,8 +82,7 @@ public abstract class Server extends Page {
     private void handleRequest(Client client, String method, String path, String line) {
         try {
 
-            if(path.charAt(0) != '/' || !method.equals("GET")) {
-                sendNotFoundResponse(client, "All requests must be GET requests to a path starting with /");
+            if (!method.equals("GET")) {
                 return;
             }
 
@@ -89,6 +91,7 @@ public abstract class Server extends Page {
 
             } else {
                 //expecting something like: /index?method<\?>param1<\?>param2
+                //path = path.substring(1);
                 if(path.contains("?")) {
                     String[] pathParts = path.split("\\?", 2);
                     String pagePath = pathParts[0];
@@ -199,6 +202,14 @@ public abstract class Server extends Page {
                 "Content-Type: " + resource.mime() + "\r\n" +
                 "\r\n" +
                 resource.resource();
+        c.out.write(httpResponse);
+        c.out.flush();
+    }
+
+    private void sendNoResponse(Client c) throws IOException {
+        String httpResponse = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "\r\n";
         c.out.write(httpResponse);
         c.out.flush();
     }

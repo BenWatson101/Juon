@@ -1,16 +1,15 @@
 import JUOM.UniversalObjects.UniversalObject;
 import JUOM.UniversalObjects.UniversalWrappers;
+import MyServer.MyServer;
+
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        try {
-            char f = (char)UniversalObject.parse(UniversalObject.convert('e').json());
+        MyServer e = new MyServer(3000);
 
-            System.out.println(f);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        e.start();
 
     }
 }

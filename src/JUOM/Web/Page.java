@@ -7,6 +7,7 @@ import JUOM.UniversalObjects.UniversalObject;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Objects;
 
 public abstract class Page extends UniversalObject {
 
@@ -44,7 +45,7 @@ public abstract class Page extends UniversalObject {
             if (path.contains("..") || new File(path).isAbsolute()) {
                 throw new Exception("Invalid path");
             }
-            BufferedReader reader = new BufferedReader(new FileReader(path));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/" + path))));
 
             StringBuilder content = new StringBuilder();
             String line;
