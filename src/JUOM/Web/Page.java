@@ -5,7 +5,6 @@ import java.io.*;
 import JUOM.JHTML.JHTML;
 import JUOM.UniversalObjects.UniversalObject;
 
-import java.io.BufferedReader;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -13,7 +12,7 @@ public abstract class Page extends UniversalObject {
 
     record Resource(String resource, String mime) {}
 
-    static Dictionary<String, String> extensionToMIME = new Hashtable<>();
+    protected static Dictionary<String, String> extensionToMIME = new Hashtable<>();
     static {
         extensionToMIME.put("html", "text/html");
         extensionToMIME.put("css", "text/css");
@@ -52,7 +51,7 @@ public abstract class Page extends UniversalObject {
             while((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
-
+            reader.close();
             return new Resource(content.toString(), mime);
 
         } else {

@@ -17,6 +17,8 @@ public abstract class JHTMLComponent extends JHTML {
     String title = null;
     String lang = null;
 
+    String src = null;
+
 
     @Override
     protected String htmlContent() {
@@ -59,6 +61,11 @@ public abstract class JHTMLComponent extends JHTML {
 
     public JHTMLComponent misc(String misc) {
         this.misc.add(misc);
+        return this;
+    }
+
+    public JHTMLComponent src(String src) {
+        this.src = src;
         return this;
     }
 
