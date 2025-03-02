@@ -1,11 +1,6 @@
 package JUOM.Web;
 
-import JUOM.JHTML.JHTML;
-import JUOM.UniversalObjects.UniversalObject;
-
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -76,7 +71,7 @@ public abstract class Server extends Page {
                     }
 
                 } else {
-                    sendNotFoundResponse(client, "Incorrect request format\n http request: " + line);
+                    sendPageNotFoundResponse(client, "Incorrect request format\n http request: " + line);
                 }
             }
 
@@ -92,6 +87,9 @@ public abstract class Server extends Page {
             return;
         }
 
+        System.out.println("Server URL: " + url);
+        System.out.println("Server next: " + nextURLPart(url));
+
         ServerObject obj = objectMap.get(nextURLPart(url));
 
         if(obj != null) {
@@ -102,20 +100,16 @@ public abstract class Server extends Page {
 
         } else {
 
-            Resource resource;
-
             try {
-                resource = handleResource(url);
-            } catch (Exception e) {
-                sendNotFoundResponse(client, "Error fetching resource: " + e.getMessage());
-                return;
+                sendResourceResponse(client, handleResource(url));
+            } catch (IOException e) {
+                sendPageNotFoundResponse(client, "File not found");
             }
-
-            sendResourceResponse(client, resource);
         }
     }
 
-    public final void addServerObject(String path, ServerObject obj) {
-        objectMap.put(path, obj);
+    public final void addServerObject(ServerObject obj) {
+        System.out.println("Adding object: " + obj.getClass().getSimpleName());
+        objectMap.put(obj.getClass().getSimpleName(), obj);
     }
 }

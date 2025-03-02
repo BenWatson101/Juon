@@ -1,14 +1,27 @@
 package JUOM.JHTML;
 
+import JUOM.UniversalObjects.Universal;
+import JUOM.UniversalObjects.UniversalObject;
+import JUOM.UniversalObjects.WrapMyselfUniversally;
+
 import java.io.*;
 import java.util.Objects;
 
-public abstract class JHTML {
+public abstract class JHTML implements WrapMyselfUniversally {
 
     private JHTML first = null;
     private JHTML last = null;
 
     JHTML child = null;
+
+    public static class JHTMLWrapper extends UniversalObject {
+        @Universal
+        private String content;
+
+        public JHTMLWrapper(JHTML jhtml) {
+            this.content = jhtml.html();
+        }
+    }
 
     public String html() {
         StringBuilder html = new StringBuilder();
@@ -77,6 +90,21 @@ public abstract class JHTML {
             }
         };
     }
+
+    public static JHTML text(String before, String after) {
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                return before + child.html() + after;
+            }
+        };
+    }
+
+    @Override
+    public UniversalObject wrapMyself() {
+        return new JHTMLWrapper(this);
+    }
+
 
 
 

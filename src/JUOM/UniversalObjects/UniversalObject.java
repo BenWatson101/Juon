@@ -121,8 +121,10 @@ public abstract class UniversalObject {
     }
 
     public static UniversalObject convert(Object o) throws IllegalArgumentException {
-        if(o instanceof UniversalObject) {
-            return (UniversalObject) o;
+        if(o instanceof UniversalObject uo) {
+            return uo;
+        } else if (o instanceof WrapMyselfUniversally) {
+            return ((WrapMyselfUniversally) o).wrapMyself();
         } else if(o == null) {
             return new UniversalWrappers.UONull();
         } else if (o instanceof String) {

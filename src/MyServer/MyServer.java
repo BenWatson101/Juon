@@ -1,5 +1,6 @@
 package MyServer;
 
+import JUOM.JHTML.HTML;
 import JUOM.JHTML.JHTML;
 import JUOM.UniversalObjects.Universal;
 import JUOM.Web.Server;
@@ -7,17 +8,24 @@ import JUOM.Web.Server;
 import java.io.IOException;
 
 public class MyServer extends Server {
+
     public MyServer(int port) throws IOException {
         super(port);
+
+        this.addServerObject(new MyPage.MyPage());
     }
 
     @Override
     protected JHTML startingPage() {
-        try {
-            return JHTML.file("start.html", this.getClass());
-        } catch (IOException e) {
-            return JHTML.text("<h1>ERROR</h1><p>error loading fileeee</p>");
-        }
+        return new HTML.Body().child(
+                new HTML.H1().child(
+                        JHTML.text("Hello World!").link(
+                        new HTML.P().child(
+                                JHTML.text("This is a test page.")
+                        )
+                        )
+                )
+        );
     }
 
     @Override
@@ -25,8 +33,10 @@ public class MyServer extends Server {
         return JHTML.text(message);
     }
 
-    @Universal(pageMethod = true)
-    void something() {}
+
+    void something() {
+        System.out.println("Hello World!");
+    }
 
 
 }
