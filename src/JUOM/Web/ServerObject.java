@@ -2,6 +2,7 @@ package JUOM.Web;
 
 import JUOM.JHTML.JHTML;
 import JUOM.UniversalObjects.Universal;
+import JUOM.UniversalObjects.UniversalException;
 import JUOM.UniversalObjects.UniversalObject;
 
 import java.io.*;
@@ -49,7 +50,8 @@ public abstract class ServerObject extends UniversalObject {
     protected final void parseParams(Server.Client c, String paramString) throws IOException {
 
         try {
-            paramString = URLDecoder.decode(paramString.substring(1), StandardCharsets.UTF_8);
+
+            paramString = URLDecoder.decode(paramString.substring(2), StandardCharsets.UTF_8);
 
             String[] paramsAndName = paramString.split("\\Q<&>\\E", 2);
             String methodName = paramsAndName[0];
@@ -67,7 +69,8 @@ public abstract class ServerObject extends UniversalObject {
                 Constructor<?>[] constructors = this.getClass().getConstructors();
                 for (Constructor<?> constructor : constructors) {
                     if(constructor.getParameterCount() == objects.length
-                        && constructor.isAnnotationPresent(Universal.class)) {
+                        && constructor.isAnnotationPresent(Universal.class)
+                        && constructor.getAnnotation(Universal.class).pageMethod()) {
 
                         try {
                             sendUniversalResponse(c, (UniversalObject) constructor.newInstance(objects));
@@ -79,7 +82,8 @@ public abstract class ServerObject extends UniversalObject {
                 for (Method method : this.getClass().getDeclaredMethods()) {
                     if (method.getName().equals(methodName)
                         && method.getParameterCount() == objects.length
-                        && method.isAnnotationPresent(Universal.class)) {
+                        && method.isAnnotationPresent(Universal.class)
+                        && method.getAnnotation(Universal.class).pageMethod()) {
 
                         try {
                             method.setAccessible(true);
@@ -90,11 +94,11 @@ public abstract class ServerObject extends UniversalObject {
                 }
             }
 
-            sendPageNotFoundResponse(c, "Method called " + paramsAndName[0] +  "() for page "
+            sendExceptionFoundResponse(c, "Method called " + paramsAndName[0] +  "() for page "
                     + this.getClass().getName() + " not found");
 
         } catch (Exception e) {
-            sendPageNotFoundResponse(c, "Invalid parameters when executing page methods for page "
+            sendExceptionFoundResponse(c, "Invalid parameters when executing page methods for page "
                     + this.getClass().getName());
         }
     }
@@ -157,12 +161,6 @@ public abstract class ServerObject extends UniversalObject {
         sendHTMLResponse(c, pageNotFound(message));
     }
 
-    protected final void sendJSONNotFoundResponse(Server.Client c, String message) throws IOException {
-            sendResponse(c, new Resource("{\"error\": \""
-                    + message.replace("\"", "\\\"")
-                    + "\"}", "application/json"), 404);
-    }
-
     protected final void sendResourceResponse(Server.Client c, Resource resource) throws IOException {
         sendResponse(c, resource, 200);
     }
@@ -175,9 +173,15 @@ public abstract class ServerObject extends UniversalObject {
         sendResponse(c, new Resource(obj.json(), "application/json"), 200);
     }
 
+    protected final void sendExceptionFoundResponse(Server.Client c, String message) throws IOException {
+        sendUniversalResponse(c, new UniversalException(message));
+    }
+
     protected final void sendNoResponse(Server.Client c) throws IOException {
         sendResponse(c, new Resource("", "text/html"), 200);
     }
+
+
 
     protected abstract JHTML pageNotFound(String message);
 
