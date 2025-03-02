@@ -1,6 +1,7 @@
 package MyServer;
 
 import JUOM.JHTML.JHTML;
+import JUOM.UniversalObjects.Universal;
 import JUOM.Web.Server;
 
 import java.io.IOException;
@@ -21,12 +22,11 @@ public class MyServer extends Server {
 
     @Override
     protected JHTML pageNotFound(String message) {
-        try {
-            return JHTML.file("error.html", this.getClass());
-        } catch (IOException e) {
-            return JHTML.text("<h1>ERROR</h1><p>error loading file</p>");
-        }
+        return JHTML.text(message);
     }
+
+    @Universal(pageMethod = true)
+    void something() {}
 
 
 }

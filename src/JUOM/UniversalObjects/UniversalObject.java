@@ -1,6 +1,8 @@
 package JUOM.UniversalObjects;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -75,7 +77,8 @@ public abstract class UniversalObject {
     // {"class":"String",
     // "value":"Hello World"
     // }
-    public static Object[] parse(String[] jsons) throws Exception{
+    public static Object[] parse(String[] jsons) throws Exception {
+
         Object[] objects = new Object[jsons.length];
         for (int i = 0; i < jsons.length; i++) {
             objects[i] = parse(jsons[i]);
@@ -137,7 +140,7 @@ public abstract class UniversalObject {
             }
             return new UniversalWrappers.UOArray(array);
         } else {
-            throw new IllegalArgumentException("Object is not a UniversalObject");
+            throw new IllegalArgumentException("Object is not a UniversalObject: " + o.getClass().getName());
         }
     }
 

@@ -17,14 +17,14 @@ public abstract class Server extends Page {
     private final ServerSocket serverSocket;
     private boolean running = true;
 
-    private final Map<String, Page> pageMap = new HashMap<>();
+    private final Map<String, ServerObject> objectMap = new HashMap<>();
 
     public Server(int port) throws IOException {
         this.port = port;
         this.serverSocket = new ServerSocket(port);
     }
 
-    public void start() {
+    public final void start() {
         running = true;
 
         new Thread(() -> {
@@ -38,7 +38,7 @@ public abstract class Server extends Page {
         running = false;
     }
 
-    private class Client implements AutoCloseable {
+    protected final class Client implements AutoCloseable {
         public final BufferedReader in;
         public final BufferedWriter out;
 
@@ -65,9 +65,16 @@ public abstract class Server extends Page {
                 String[] requestParts = line.split(" ");
                 if (requestParts.length >= 2) {
 
-                    //System.out.println("Request: " + line);
+                    String url = requestParts[1];
+                    String method = requestParts[0];
 
-                    handleRequest(client, requestParts[0], requestParts[1], line);
+                    if (url.equals("/") && method.equals("GET")) {
+                        sendHTMLResponse(client, startingPage());
+
+                    } else {
+                        handleRequest(client, requestParts[0], url);
+                    }
+
                 } else {
                     sendNotFoundResponse(client, "Incorrect request format\n http request: " + line);
                 }
@@ -79,142 +86,36 @@ public abstract class Server extends Page {
         }
     }
 
-    private void handleRequest(Client client, String method, String path, String line) {
-        try {
+    protected void handleRequest(Client client, String method, String url) throws IOException {
 
-            if (!method.equals("GET")) {
+        if(!method.equals("GET")) {
+            return;
+        }
+
+        ServerObject obj = objectMap.get(nextURLPart(url));
+
+        if(obj != null) {
+            obj.handleURL(client, truncateUrL(url));
+
+        } else if(url.contains("?")) {
+            handleURL(client, url);
+
+        } else {
+
+            Resource resource;
+
+            try {
+                resource = handleResource(url);
+            } catch (Exception e) {
+                sendNotFoundResponse(client, "Error fetching resource: " + e.getMessage());
                 return;
             }
 
-            if (path.equals("/")) {
-                sendHTMLResponse(client, startingPage());
-
-            } else {
-                //expecting something like: /index?method<\?>param1<\?>param2
-                //path = path.substring(1);
-                if(path.contains("?")) {
-                    String[] pathParts = path.split("\\?", 2);
-                    String pagePath = pathParts[0];
-
-                    Page page = pageMap.get(pagePath.substring(1));
-
-                    if (page == null) {
-                        sendNotFoundResponse(client, "Page not found");
-                        return;
-                    }
-
-                    if(pathParts.length == 1) {
-                        sendHTMLResponse(client, page.startingPage());
-                    } else {
-                        parseParams(client, pathParts[1], page, line);
-                    }
-                //expecting something like: /index/something.extension
-                //or /index/something/somethingElse.extension
-                //or /something.extension
-                } else {
-                    String[] splits = path.split("/",3);
-                    Page page = pageMap.get(splits[1]);
-                    try {
-                        if(page != null) {
-                            sendResourceResponse(client, page.handleResource(splits[2]));
-                        } else {
-                            sendResourceResponse(client, handleResource(path.split("/",2)[1]));
-                        }
-                    } catch (Exception e) {
-                        sendNotFoundResponse(client, "Error handling request: " + e.getMessage()
-                                + "\n http request: " + line);
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error handling request: " + e.getMessage() + "\n http request: " + line);
-            e.printStackTrace();
+            sendResourceResponse(client, resource);
         }
     }
 
-    private void parseParams(Client c, String paramString, Page p, String line) throws Exception {
-        String[] paramsAndName = paramString.split("<\\?>", 2);
-        String methodName = paramsAndName[0];
-        String[] params = paramsAndName[1].split("<\\?>");
-        Object[] objects = UniversalObject.parse(params);
-
-        if(methodName.equals(p.getClass().getName())) {
-            Constructor<?>[] constructors = p.getClass().getConstructors();
-            for (Constructor<?> constructor : constructors) {
-                if(constructor.getParameterCount() == objects.length) {
-
-                    sendUniversalResponse(c, (UniversalObject) constructor.newInstance(objects));
-                    return;
-                }
-            }
-        } else {
-            for (Method method : p.getClass().getDeclaredMethods()) {
-                if (method.getParameterCount() == objects.length) {
-                    method.setAccessible(true);
-
-                    sendUniversalResponse(c, UniversalObject.convert(method.invoke(p, objects)));
-                    return;
-                }
-            }
-        }
-
-        sendNotFoundResponse(c, "Method for page " + p.getClass().getName() + "not found" +
-                "\n http request: " + line);
-
-    }
-
-
-    private void sendNotFoundResponse(Client c) throws IOException {
-        sendNotFoundResponse(c, "");
-    }
-
-    private void sendNotFoundResponse(Client c, String message) throws IOException {
-        String httpResponse = "HTTP/1.1 404 Not Found\r\n" +
-                "Content-Type: text/html\r\n" +
-                "\r\n" +
-                pageNotFound(message).html();
-        c.out.write(httpResponse);
-        c.out.flush();
-    }
-
-    private void sendHTMLResponse(Client c, JHTML html) throws IOException {
-        String httpResponse = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html\r\n" +
-                "\r\n" +
-                html.html();
-        c.out.write(httpResponse);
-        c.out.flush();
-    }
-
-    private void sendUniversalResponse(Client c, UniversalObject obj) throws IOException {
-        String httpResponse = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: application/json\r\n" +
-                "\r\n" +
-                "{\"class\":" + obj.getClass().getName() +
-                ",\"contents\":" + obj.json() + "}";
-        c.out.write(httpResponse);
-        c.out.flush();
-    }
-
-    private void sendResourceResponse(Client c, Resource resource) throws IOException {
-        String httpResponse = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: " + resource.mime() + "\r\n" +
-                "\r\n" +
-                resource.resource();
-        c.out.write(httpResponse);
-        c.out.flush();
-    }
-
-    private void sendNoResponse(Client c) throws IOException {
-        String httpResponse = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html\r\n" +
-                "\r\n";
-        c.out.write(httpResponse);
-        c.out.flush();
-    }
-
-    public void addPage(String path, Page page) {
-        pageMap.put(path, page);
+    public final void addServerObject(String path, ServerObject obj) {
+        objectMap.put(path, obj);
     }
 }

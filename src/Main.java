@@ -7,7 +7,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        MyServer e = new MyServer(3000);
+        MyServer e = new MyServer(3001);
 
         e.start();
 
