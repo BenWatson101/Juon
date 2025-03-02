@@ -70,7 +70,7 @@ public abstract class ServerObject extends UniversalObject {
                 for (Constructor<?> constructor : constructors) {
                     if(constructor.getParameterCount() == objects.length
                         && constructor.isAnnotationPresent(Universal.class)
-                        && constructor.getAnnotation(Universal.class).pageMethod()) {
+                        && constructor.getAnnotation(Universal.class).webMethod()) {
 
                         try {
                             sendUniversalResponse(c, (UniversalObject) constructor.newInstance(objects));
@@ -83,7 +83,7 @@ public abstract class ServerObject extends UniversalObject {
                     if (method.getName().equals(methodName)
                         && method.getParameterCount() == objects.length
                         && method.isAnnotationPresent(Universal.class)
-                        && method.getAnnotation(Universal.class).pageMethod()) {
+                        && method.getAnnotation(Universal.class).webMethod()) {
 
                         try {
                             method.setAccessible(true);

@@ -1,7 +1,7 @@
 package JUOM.UniversalObjects;
 
 public class UniversalWrappers {
-    public static class UOString extends UniversalObject {
+    public final static class UOString extends UniversalObject {
         @Universal
         public String value;
 
@@ -10,7 +10,7 @@ public class UniversalWrappers {
         }
     }
 
-    public static class UOChar extends UniversalObject {
+    public final static class UOChar extends UniversalObject {
         @Universal
         public char value;
 
@@ -19,7 +19,7 @@ public class UniversalWrappers {
         }
     }
 
-    public static class UOInt extends UniversalObject {
+    public final static class UOInt extends UniversalObject {
         @Universal
         public int value;
 
@@ -28,7 +28,7 @@ public class UniversalWrappers {
         }
     }
 
-    public static class UOBoolean extends UniversalObject {
+    public final static class UOBoolean extends UniversalObject {
         @Universal
         public boolean value;
 
@@ -37,7 +37,7 @@ public class UniversalWrappers {
         }
     }
 
-    public static class UOArray extends UniversalObject {
+    public final static class UOArray extends UniversalObject {
         @Universal
         public UniversalObject[] value;
 
@@ -46,7 +46,7 @@ public class UniversalWrappers {
         }
     }
 
-    public static class UONull extends UniversalObject {
+    public final static class UONull extends UniversalObject {
         public UONull() {}
     }
 

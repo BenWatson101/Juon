@@ -1,8 +1,6 @@
 package MyServer;
 
-import JUOM.JHTML.HTML;
 import JUOM.JHTML.JHTML;
-import JUOM.UniversalObjects.Universal;
 import JUOM.Web.Server;
 
 import java.io.IOException;

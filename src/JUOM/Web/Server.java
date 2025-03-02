@@ -109,7 +109,6 @@ public abstract class Server extends Page {
     }
 
     public final void addServerObject(ServerObject obj) {
-        System.out.println("Adding object: " + obj.getClass().getSimpleName());
         objectMap.put(obj.getClass().getSimpleName(), obj);
     }
 }

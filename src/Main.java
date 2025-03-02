@@ -10,8 +10,6 @@ public class Main {
 
         MyServer e = new MyServer(3001);
 
-        System.out.println(UniversalObject.convert("Hello World!").getClass().getName());
-
         e.start();
 
     }
