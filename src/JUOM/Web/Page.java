@@ -12,7 +12,25 @@ public abstract class Page extends ServerObject {
         return parts.length > 1 ? parts[1] : "";
     }
 
+    protected final String truncateUrL(String url) {
+        //System.out.println("Untruncated URL: " + url);
+        if(url.charAt(url.length() - 1) != '/') {
+            url += "/";
+        }
+        int q = url.indexOf("?");
+        int s = url.indexOf("/");
+        if(q > s) {
+            url = '?'+ url.split("[/?]", 3)[2];
+        } else {
+            url = '/'+ url.split("[/?]", 3)[2];
+        }
 
+        if(url.charAt(url.length() - 1) != '/') {
+            url += "/";
+        }
+
+        return url;
+    }
 
 
     protected abstract JHTML startingPage();

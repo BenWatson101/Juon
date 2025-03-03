@@ -8,6 +8,8 @@ import java.util.LinkedList;
 @Deprecated
 public abstract class JHTMLComponent extends JHTML {
 
+    JHTML child = null;
+
     LinkedList<String> classes = new LinkedList<>();
     String style = null;
     String ID = null;
@@ -20,6 +22,8 @@ public abstract class JHTMLComponent extends JHTML {
 
     String src = null;
 
+    public JHTMLComponent() {}
+
     public JHTMLComponent(String text) {
         this.child = new JHTMLText(text);
     }
@@ -28,6 +32,7 @@ public abstract class JHTMLComponent extends JHTML {
         private final String text;
 
         public JHTMLText(String text) {
+            super();
             this.text = text;
         }
 

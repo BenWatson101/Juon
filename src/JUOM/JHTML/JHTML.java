@@ -5,14 +5,11 @@ import JUOM.UniversalObjects.UniversalObject;
 import JUOM.UniversalObjects.WrapMyselfUniversally;
 
 import java.io.*;
-import java.util.Objects;
 
 public abstract class JHTML implements WrapMyselfUniversally {
 
     private JHTML first = null;
     private JHTML last = null;
-
-    JHTML child = null;
 
     public static class JHTMLWrapper extends UniversalObject {
         @Universal
@@ -41,11 +38,6 @@ public abstract class JHTML implements WrapMyselfUniversally {
         }
         this.last = jhtml;
 
-        return this;
-    }
-
-    public JHTML child(JHTML jhtml) {
-        this.child = jhtml;
         return this;
     }
 
@@ -91,15 +83,6 @@ public abstract class JHTML implements WrapMyselfUniversally {
         };
     }
 
-    public static JHTML text(String before, String after) {
-        return new JHTML() {
-            @Override
-            protected String htmlContent() {
-                return before + child.html() + after;
-            }
-        };
-    }
-
     public static JHTML template(JHTML... e) {
         return new JHTML() {
             @Override
@@ -113,11 +96,68 @@ public abstract class JHTML implements WrapMyselfUniversally {
         };
     }
 
+    public static JHTML iff(boolean condition, JHTML jhtml) {
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                return condition ? jhtml.html() : "";
+            }
+        };
+    }
+
+    public static JHTML iff(boolean condition, JHTML jhtml, JHTML elseJHTML) {
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                return condition ? jhtml.html() : elseJHTML.html();
+            }
+        };
+    }
+
+    public static JHTML repeat(int times, JHTML jhtml) {
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                StringBuilder html = new StringBuilder();
+                for(int i = 0; i < times; i++) {
+                    html.append(jhtml.html());
+                }
+                return html.toString();
+            }
+        };
+    }
+
+    public abstract static class Counter {
+        private int start;
+        private int end;
+
+        public Counter(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public abstract JHTML execute(int i, JHTML jhtml);
+    }
+
+    public static JHTML forInt(Counter r , JHTML jhtml) {
+
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                StringBuilder html = new StringBuilder();
+                for(int i = r.start; i < r.end; i++) {
+                    html.append(r.execute(i, jhtml).html());
+                }
+                return html.toString();
+            }
+        };
+    }
+
+
     @Override
     public final UniversalObject wrapMyself() {
         return new JHTMLWrapper(this);
     }
-
 
 
 

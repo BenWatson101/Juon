@@ -22,9 +22,25 @@ public abstract class Server extends Page {
     public final void start() {
         running = true;
 
-        new Thread(() -> {
+        new MonitoredThread(() -> {
             while (running) {
-                new Thread(this::attemptConnection).start();
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    new MonitoredThread(() -> handleClient(clientSocket)).start();
+                } catch (IOException e) {
+                    System.out.println("Accept failed: " + e.getMessage());
+                }
+            }
+        }).start();
+
+        new MonitoredThread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(5000);
+                    MonitoredThread.printInstancesAndMemory();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
@@ -36,30 +52,31 @@ public abstract class Server extends Page {
     protected final class Client implements AutoCloseable {
         public final BufferedReader in;
         public final BufferedWriter out;
+        private final Socket socket;
 
-        public Client() throws IOException {
-            Socket socket = serverSocket.accept();
+        public Client(Socket socket) throws IOException {
+            this.socket = socket;
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         }
 
+        @Override
         public void close() throws IOException {
             in.close();
             out.close();
+            socket.close();
         }
     }
 
-    private void attemptConnection() {
-
-        try (Client client = new Client()) {
+    private void handleClient(Socket clientSocket) {
+        try (Client client = new Client(clientSocket)) {
 
             String line;
             while (!(line = client.in.readLine()).isEmpty()) {
 
-                //expecting something like: GET /index HTTP/1.1
                 String[] requestParts = line.split(" ");
-                if (requestParts.length >= 2) {
 
+                if (requestParts.length >= 2) {
                     String url = requestParts[1];
                     String method = requestParts[0];
 
@@ -74,7 +91,6 @@ public abstract class Server extends Page {
                     sendPageNotFoundResponse(client, "Incorrect request format\n http request: " + line);
                 }
             }
-
         } catch (IOException e) {
             System.out.println("Client connection error: " + e.getMessage());
             e.printStackTrace();

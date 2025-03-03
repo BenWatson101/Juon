@@ -28,30 +28,17 @@ public abstract class ServerObject extends UniversalObject {
         extensionToMIME.put("ico", "image/x-icon");
     }
 
-    protected final String truncateUrL(String url) {
-        //System.out.println("Untruncated URL: " + url);
-        if(url.charAt(url.length() - 1) != '/') {
-            url += "/";
-        }
-        int q = url.indexOf("?");
-        int s = url.indexOf("/");
-        if(q > s) {
-            url = '?'+ url.split("[/?]", 3)[2];
-        } else {
-            url = '/'+ url.split("[/?]", 3)[2];
-        }
 
-        if(url.charAt(url.length() - 1) == '/') {
-            url = url.substring(0, url.length() - 1);
-        }
-        return url;
-    }
 
     protected final void parseParams(Server.Client c, String paramString) throws IOException {
 
         try {
 
-            paramString = URLDecoder.decode(paramString.substring(2), StandardCharsets.UTF_8);
+            //System.out.println("Params1: " + paramString);
+
+            paramString = URLDecoder.decode(paramString.substring(1, paramString.length() - 1), StandardCharsets.UTF_8);
+
+            //System.out.println("Params2: " + paramString);
 
             String[] paramsAndName = paramString.split("\\Q<&>\\E", 2);
             String methodName = paramsAndName[0];
