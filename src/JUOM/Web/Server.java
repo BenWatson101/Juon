@@ -12,7 +12,7 @@ public abstract class Server extends Page {
     private final ServerSocket serverSocket;
     private boolean running = true;
 
-    private final Map<String, ServerObject> objectMap = new HashMap<>();
+    private final Map<String, ServerObject> serverObjectMap = new HashMap<>();
 
     public Server(int port) throws IOException {
         this.port = port;
@@ -106,7 +106,7 @@ public abstract class Server extends Page {
 //        System.out.println("Server URL: " + url);
 //        System.out.println("Server next: " + nextURLPart(url));
 
-        ServerObject obj = objectMap.get(nextURLPart(url));
+        ServerObject obj = serverObjectMap.get(nextURLPart(url));
 
         if(obj != null) {
             obj.handleURL(client, truncateUrL(url));
@@ -125,6 +125,6 @@ public abstract class Server extends Page {
     }
 
     public final void addServerObject(ServerObject obj) {
-        objectMap.put(obj.getClass().getSimpleName(), obj);
+        serverObjectMap.put(obj.getClass().getSimpleName(), obj);
     }
 }
