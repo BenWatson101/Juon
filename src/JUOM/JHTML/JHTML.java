@@ -100,11 +100,23 @@ public abstract class JHTML implements WrapMyselfUniversally {
         };
     }
 
-    @Override
-    public UniversalObject wrapMyself() {
-        return new JHTMLWrapper(this);
+    public static JHTML template(JHTML... e) {
+        return new JHTML() {
+            @Override
+            protected String htmlContent() {
+                StringBuilder html = new StringBuilder();
+                for(JHTML jhtml : e) {
+                    html.append(jhtml.html());
+                }
+                return html.toString();
+            }
+        };
     }
 
+    @Override
+    public final UniversalObject wrapMyself() {
+        return new JHTMLWrapper(this);
+    }
 
 
 

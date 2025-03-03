@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
+@Deprecated
 public abstract class JHTMLComponent extends JHTML {
 
     LinkedList<String> classes = new LinkedList<>();
