@@ -2,12 +2,13 @@ package MyPage;
 
 import JUOM.JHTML.JHTML;
 import JUOM.Web.Page;
+import JUOM.JHTML.HTML.*;
 
 public class MyPage extends Page {
 
     @Override
     protected JHTML startingPage() {
-        return JHTML.text("<h1>My Page</h1>");
+
     }
 
     @Override

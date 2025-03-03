@@ -19,6 +19,23 @@ public abstract class JHTMLComponent extends JHTML {
 
     String src = null;
 
+    public JHTMLComponent(String text) {
+        this.child = new JHTMLText(text);
+    }
+
+    private class JHTMLText extends JHTML {
+        private final String text;
+
+        public JHTMLText(String text) {
+            this.text = text;
+        }
+
+        @Override
+        protected String htmlContent() {
+            return text;
+        }
+    }
+
 
     @Override
     protected String htmlContent() {

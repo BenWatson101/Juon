@@ -87,8 +87,8 @@ public abstract class Server extends Page {
             return;
         }
 
-        System.out.println("Server URL: " + url);
-        System.out.println("Server next: " + nextURLPart(url));
+//        System.out.println("Server URL: " + url);
+//        System.out.println("Server next: " + nextURLPart(url));
 
         ServerObject obj = objectMap.get(nextURLPart(url));
 
