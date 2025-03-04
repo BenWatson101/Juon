@@ -1,11 +1,11 @@
 package MyServer;
 
 import JUOM.JHTML.JHTML;
-import JUOM.Web.Server;
+import JUOM.Web.HTTPServer;
 
 import java.io.IOException;
 
-public class MyServer extends Server {
+public class MyServer extends HTTPServer {
 
     public MyServer(int port) throws IOException {
         super(port);

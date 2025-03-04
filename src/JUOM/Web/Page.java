@@ -38,7 +38,7 @@ public abstract class Page extends ServerObject {
 
 
     @Override
-    protected void handleURL(Server.Client c, String url) throws IOException {
+    protected void handleURL(HTTPServer.Client c, String url) throws IOException {
 
 //        System.out.println("Page URL: " + url);
 //        System.out.println("Page next: " + nextURLPart(url));

@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Server extends Page {
+public abstract class HTTPServer extends Page {
 
     private final int port;
     private final ServerSocket serverSocket;
@@ -14,7 +14,7 @@ public abstract class Server extends Page {
 
     private final Map<String, ServerObject> serverObjectMap = new HashMap<>();
 
-    public Server(int port) throws IOException {
+    public HTTPServer(int port) throws IOException {
         this.port = port;
         this.serverSocket = new ServerSocket(port);
     }

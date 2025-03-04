@@ -30,7 +30,7 @@ public abstract class ServerObject extends UniversalObject {
 
 
 
-    protected final void parseParams(Server.Client c, String paramString) throws IOException {
+    protected final void parseParams(HTTPServer.Client c, String paramString) throws IOException {
 
         try {
 
@@ -136,7 +136,7 @@ public abstract class ServerObject extends UniversalObject {
         }
     }
 
-    protected final void sendResponse(Server.Client c, Resource r, int code) throws IOException {
+    protected final void sendResponse(HTTPServer.Client c, Resource r, int code) throws IOException {
         c.out.write("HTTP/1.1 " + code + " OK\r\n" +
                 "Content-Type: " + r.mime() + "\r\n" +
                 "\r\n" +
@@ -144,27 +144,27 @@ public abstract class ServerObject extends UniversalObject {
         c.out.flush();
     }
 
-    protected final void sendPageNotFoundResponse(Server.Client c, String message) throws IOException {
+    protected final void sendPageNotFoundResponse(HTTPServer.Client c, String message) throws IOException {
         sendHTMLResponse(c, pageNotFound(message));
     }
 
-    protected final void sendResourceResponse(Server.Client c, Resource resource) throws IOException {
+    protected final void sendResourceResponse(HTTPServer.Client c, Resource resource) throws IOException {
         sendResponse(c, resource, 200);
     }
 
-    protected final void sendHTMLResponse(Server.Client c, JHTML html) throws IOException {
+    protected final void sendHTMLResponse(HTTPServer.Client c, JHTML html) throws IOException {
         sendResponse(c, new Resource(html.html(), "text/html"), 200);
     }
 
-    protected final void sendUniversalResponse(Server.Client c, UniversalObject obj) throws IOException {
+    protected final void sendUniversalResponse(HTTPServer.Client c, UniversalObject obj) throws IOException {
         sendResponse(c, new Resource(obj.json(), "application/json"), 200);
     }
 
-    protected final void sendExceptionFoundResponse(Server.Client c, String message) throws IOException {
+    protected final void sendExceptionFoundResponse(HTTPServer.Client c, String message) throws IOException {
         sendUniversalResponse(c, new UniversalException(message));
     }
 
-    protected final void sendNoResponse(Server.Client c) throws IOException {
+    protected final void sendNoResponse(HTTPServer.Client c) throws IOException {
         sendResponse(c, new Resource("", "text/html"), 200);
     }
 
@@ -172,5 +172,5 @@ public abstract class ServerObject extends UniversalObject {
 
     protected abstract JHTML pageNotFound(String message);
 
-    protected abstract void handleURL(Server.Client c, String url) throws IOException;
+    protected abstract void handleURL(HTTPServer.Client c, String url) throws IOException;
 }
