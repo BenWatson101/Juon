@@ -146,4 +146,35 @@ public abstract class UniversalObject {
         }
     }
 
+    // Deep copy method
+    public UniversalObject deepCopy() {
+        try {
+            String json = this.json();
+            return (UniversalObject) parse(json);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to copy UniversalObject", e);
+        }
+    }
+
+    // Equals method
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        UniversalObject that = (UniversalObject) obj;
+        return this.json().equals(that.json());
+    }
+
+    // HashCode method
+    @Override
+    public int hashCode() {
+        return this.json().hashCode();
+    }
+
+    // ToString method
+    @Override
+    public String toString() {
+        return this.json();
+    }
+
 }

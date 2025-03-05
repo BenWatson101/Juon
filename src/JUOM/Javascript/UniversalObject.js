@@ -34,7 +34,7 @@ function unwrap(json) {
         throw new Error('Object is not a UniversalObject');
     }
 
-    let obj = Object.create(UniversalMap.get(json.class).prototype);
+    let obj = Object.create(UniversalMap.get(json.class));
 
     for (let key in json.fields) {
         obj[key] = json.fields[key];
