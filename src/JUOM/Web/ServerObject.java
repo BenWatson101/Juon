@@ -15,6 +15,8 @@ import java.util.Hashtable;
 
 public abstract class ServerObject extends UniversalObject {
 
+    protected ServerObject parent = null;
+
     protected record Resource(String resource, String mime) {}
 
     protected static Dictionary<String, String> extensionToMIME = new Hashtable<>();
@@ -173,4 +175,8 @@ public abstract class ServerObject extends UniversalObject {
     protected abstract JHTML pageNotFound(String message);
 
     protected abstract void handleURL(HTTPServer.Client c, String url) throws IOException;
+
+    protected String path() {
+        return this.parent.path() + this.getClass().getSimpleName()  + "/";
+    }
 }

@@ -126,5 +126,11 @@ public abstract class HTTPServer extends Page {
 
     public final void addServerObject(ServerObject obj) {
         serverObjectMap.put(obj.getClass().getSimpleName(), obj);
+        obj.parent = this;
+    }
+
+    @Override
+    protected String path() {
+        return "http://localhost:" + port + "/";
     }
 }

@@ -12,8 +12,22 @@ const UnWrappingMap = new Map();
 export default class UniversalObject {
     constructor() {}
 
-    static registerClass(javaClass, jsclass) {
-        UniversalMap.set(javaClass, jsclass);
+    static registerClass(javaClassString, jsClass) {
+        UniversalMap.set(javaClassString, jsClass);
+    }
+
+    static async fetchAndUnwrap(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const json = await response.json();
+            return unwrap(json);
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+            throw error;
+        }
     }
 }
 

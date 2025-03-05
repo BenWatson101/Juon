@@ -1,6 +1,8 @@
 package JUOM.UniversalObjects;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.google.gson.Gson;
@@ -192,6 +194,41 @@ public abstract class UniversalObject {
     @Override
     public String toString() {
         return this.json();
+    }
+
+    protected static <T extends UniversalObject> void buildJavascript(Class<T> clazz) {
+        //names
+        String className = clazz.getName();
+        String simpleName = clazz.getSimpleName();
+
+        //fields
+        Field[] fields = clazz.getDeclaredFields();
+
+        //methods
+        ArrayList<Method> WebMethods = new ArrayList<>();
+        ArrayList<Method> UniversalMethods = new ArrayList<>();
+
+        //populate methods
+        for(Method method : clazz.getDeclaredMethods()) {
+            if(method.isAnnotationPresent(Universal.class)) {
+               if (method.getAnnotation(Universal.class).webMethod()) {
+                   WebMethods.add(method);
+               } else {
+                   UniversalMethods.add(method);
+               }
+            }
+        }
+
+        //build javascript
+        StringBuilder prototypeFile = new StringBuilder();
+
+        prototypeFile.append("//-------------------------------\n");
+        prototypeFile.append("//------------WARNING------------\n");
+        prototypeFile.append("//--DO NOT PUT ANYTHING IN THIS--\n");
+        prototypeFile.append("//--FILE AS IT WILL BE DELETED!--\n");
+        prototypeFile.append("//-------------------------------\n");
+        prototypeFile.append("//\n\n\n");
+
     }
 
 }
