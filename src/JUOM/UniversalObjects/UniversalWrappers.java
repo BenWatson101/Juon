@@ -50,5 +50,23 @@ public class UniversalWrappers {
         public UONull() {}
     }
 
+    public final static class UOFloat extends UniversalObject {
+        @Universal
+        public float value;
+
+        public UOFloat(float value) {
+            this.value = value;
+        }
+    }
+
+    public final static class UODouble extends UniversalObject {
+        @Universal
+        public double value;
+
+        public UODouble(double value) {
+            this.value = value;
+        }
+    }
+
 
 }

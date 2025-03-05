@@ -23,6 +23,7 @@ public abstract class UniversalObject {
             if (field.isAnnotationPresent(Universal.class)) {
                 field.setAccessible(true);
                 try {
+
                     if (!first) {
                         json.append(",");
                     }
@@ -100,6 +101,18 @@ public abstract class UniversalObject {
             return fields.get("value").getAsBoolean();
         } else if (className.equals(UniversalWrappers.UOChar.class.getName())) {
             return fields.get("value").getAsString().charAt(0);
+        } else if (className.equals(UniversalWrappers.UOArray.class.getName())) {
+            UniversalObject[] array = new UniversalObject[fields.getAsJsonArray("value").size()];
+            for (int i = 0; i < array.length; i++) {
+                array[i] = (UniversalObject) parse(fields.getAsJsonArray("value").get(i).toString());
+            }
+            return array;
+        } else if (className.equals(UniversalWrappers.UONull.class.getName())) {
+            return null;
+        } else if (className.equals(UniversalWrappers.UOFloat.class.getName())) {
+            return fields.get("value").getAsFloat();
+        } else if (className.equals(UniversalWrappers.UODouble.class.getName())) {
+            return fields.get("value").getAsDouble();
         }
 
 
@@ -141,6 +154,10 @@ public abstract class UniversalObject {
                 array[i] = convert(java.lang.reflect.Array.get(o, i));
             }
             return new UniversalWrappers.UOArray(array);
+        } else if (o instanceof Float) {
+            return new UniversalWrappers.UOFloat((float) o);
+        } else if (o instanceof Double) {
+            return new UniversalWrappers.UODouble((double) o);
         } else {
             throw new IllegalArgumentException("Object is not a UniversalObject: " + o.getClass().getName());
         }
