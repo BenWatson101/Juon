@@ -52,7 +52,7 @@ public abstract class HTTPServer extends Page {
         running = false;
     }
 
-    protected final class Client implements AutoCloseable {
+    public static final class Client implements AutoCloseable {
         public final BufferedReader in;
         public final BufferedWriter out;
         private final Socket socket;
