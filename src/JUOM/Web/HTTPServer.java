@@ -14,9 +14,12 @@ public abstract class HTTPServer extends Page {
 
     private final Map<String, ServerObject> serverObjectMap = new HashMap<>();
 
+    private String domainName;
+
     public HTTPServer(int port) throws IOException {
         this.port = port;
         this.serverSocket = new ServerSocket(port);
+        this.domainName = "http://localhost:" + port;
     }
 
     public final void start() {
@@ -124,13 +127,20 @@ public abstract class HTTPServer extends Page {
         }
     }
 
+    //domain name WITHOUT the slash at the end
+    @Override
+    protected String path() {
+        return domainName + "/";
+    }
+
     public final void addServerObject(ServerObject obj) {
         serverObjectMap.put(obj.getClass().getSimpleName(), obj);
         obj.parent = this;
     }
 
-    @Override
-    protected String path() {
-        return "http://localhost:" + port + "/";
+    public final void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
+
+
 }
