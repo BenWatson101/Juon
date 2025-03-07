@@ -1,5 +1,8 @@
 package JUOM;
 
+import JUOM.Utils.JarChecker;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,16 +10,43 @@ public class ObjectManager {
     private static final Map<String, Command> commands = new HashMap<>();
 
     static {
+        commands.put("extract", args -> {
+            if (args.length < 1) {
+                System.out.println("Usage: extract <js | >");
+            } else {
+                if(JarChecker.isRunningFromJar() && args[0].equals("js")) {
+                    try (PrintWriter writer = new PrintWriter(new File("UniversalObject.js"))) {
+                        InputStream e = ObjectManager.class.getResourceAsStream("/JUOM/Javascript/UniversalObject.js");
+
+                        if (e == null) {
+                            throw new FileNotFoundException("File not found");
+                        }
+
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(e));
+
+                        String line;
+                        while((line = reader.readLine()) != null) {
+                            writer.println(line);
+                        }
+
+                        reader.close();
+
+                    } catch (IOException e) {
+                        System.out.println("An error occurred while writing to the file: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("ERROR Not running from JAR");
+                }
+            }
+        });
+
         commands.put("create", args -> {
-            if (args.length < 2) {
+            if (args.length < 3) {
                 System.out.println("Usage: create-page <type> <name>");
 
                 System.out.println("\nAvailable types:");
                 System.out.println("UniversalObject");
                 System.out.println("Page");
-
-                //String jarDir = new File(ObjectManager.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-                //System.out.println("JAR Directory: " + jarDir);
 
                 return;
             }
@@ -30,10 +60,9 @@ public class ObjectManager {
 
         commands.put("help", args -> {
             System.out.println("Available commands:");
-            System.out.println("  create-page <className> <path> - Creates a new page class");
-            System.out.println("  list-pages                    - Lists all pages in the project");
-            System.out.println("  help                         - Shows this help message");
-            System.out.println("  exit                         - Exits the CLI");
+            System.out.println("  extract <js | >      - Extracts necessary files for development");
+            System.out.println("  list-objects         - Lists all objects in the project");
+            System.out.println("  help                 - Shows this help message");
         });
     }
 

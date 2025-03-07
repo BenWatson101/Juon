@@ -83,6 +83,8 @@ public abstract class HTTPServer extends Page {
                     String url = requestParts[1];
                     String method = requestParts[0];
 
+                    url = processUrl(url);
+
                     if (url.equals("/") && method.equals("GET")) {
                         sendHTMLResponse(client, startingPage());
 
@@ -106,8 +108,14 @@ public abstract class HTTPServer extends Page {
             return;
         }
 
+
+
 //        System.out.println("Server URL: " + url);
 //        System.out.println("Server next: " + nextURLPart(url));
+
+        if(nextURLPart(url).equals(getClass().getSimpleName())) {
+            url = truncateUrL(url);
+        }
 
         ServerObject obj = serverObjectMap.get(nextURLPart(url));
 
@@ -115,14 +123,14 @@ public abstract class HTTPServer extends Page {
             obj.handleURL(client, truncateUrL(url));
 
         } else if(url.contains("?")) {
-            handleURL(client, url);
+            handleURL(client, truncateUrL(url));
 
         } else {
 
             try {
                 sendResourceResponse(client, handleResource(url));
             } catch (IOException e) {
-                sendPageNotFoundResponse(client, "File not found");
+                sendPageNotFoundResponse(client, "File not found!!!!!!!!!!!");
             }
         }
     }

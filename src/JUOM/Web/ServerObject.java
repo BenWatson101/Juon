@@ -10,8 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 
 public abstract class ServerObject extends UniversalObject {
 
@@ -56,15 +55,40 @@ public abstract class ServerObject extends UniversalObject {
         return url;
     }
 
+    protected final String processUrl(String url) {
+
+        if (url.equals("/")) {
+            return "/";
+        }
+
+        List<String> splits = new LinkedList<>(Arrays.asList(url.split("/")));
+
+        for(int i = 0; i < splits.size(); i++) {
+
+            if(splits.get(i).equals("..")) {
+                splits.remove(i);
+                splits.remove(i - 1);
+                i -= 2;
+            } else if (splits.get(i).equals(".")) {
+                splits.remove(i);
+                i--;
+            } else {
+                splits.set(i, URLDecoder.decode(splits.get(i), StandardCharsets.UTF_8));
+            }
+        }
+        return String.join("/", splits);
+    }
+
 
 
     protected final void parseParams(HTTPServer.Client c, String paramString) throws IOException {
 
         try {
 
-            //System.out.println("Params1: " + paramString);
+            System.out.println("Params: " + paramString);
 
-            paramString = URLDecoder.decode(paramString.substring(1, paramString.length() - 1), StandardCharsets.UTF_8);
+            //paramString = URLDecoder.decode(paramString.substring(1, paramString.length() - 1), StandardCharsets.UTF_8);
+            paramString = paramString.substring(1, paramString.length() - 1);
 
             //System.out.println("Params2: " + paramString);
 
@@ -114,7 +138,7 @@ public abstract class ServerObject extends UniversalObject {
 
         } catch (Exception e) {
             sendExceptionFoundResponse(c, "Invalid parameters when executing page methods for page "
-                    + this.getClass().getName());
+                    + this.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -122,6 +146,12 @@ public abstract class ServerObject extends UniversalObject {
 
 
     protected final Resource handleResource(String path) throws IOException {
+
+        if(path.charAt(path.length() - 1) == '/') {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        System.out.println("Path: " + path);
 
         if(path.charAt(0) == '.') {
             throw new IOException("Invalid path");
