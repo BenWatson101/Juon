@@ -22,8 +22,13 @@
                 <configuration>
                     <source>16</source>
                     <target>16</target>
+                    <excludes>
+                        <exclude>src/JUOM/Required/Required.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+
 </project>

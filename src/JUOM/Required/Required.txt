@@ -1,0 +1,11 @@
+package Required;
+
+import JUOM.JHTML.JHTML;
+import JUOM.Web.ServerObject;
+
+public class Required extends ServerObject {
+    @Override
+    protected JHTML pageNotFound(String message) {
+        return null;
+    }
+}

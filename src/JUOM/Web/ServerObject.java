@@ -96,7 +96,7 @@ public abstract class ServerObject extends UniversalObject {
             String methodName = paramsAndName[0];
 
 
-            String[] params = paramsAndName[1].split("\\Q<&>\\E");
+            String[] params = paramsAndName.length > 1 ? paramsAndName[1].split("\\Q<&>\\E") : new String[0];
 
             if(params.length == 1 && params[0].isEmpty()) {
                 params = new String[0];
