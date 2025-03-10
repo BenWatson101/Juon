@@ -14,7 +14,7 @@ public abstract class Page extends ServerObject {
 
 
     @Override
-    protected void handleURL(HTTPServer.Client c, String url) throws IOException {
+    protected void handleURL(Client c, String url) throws IOException {
 
         if(url.equals("/")) {
             sendHTMLResponse(c, startingPage());

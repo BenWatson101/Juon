@@ -8,4 +8,8 @@ public class UniversalException extends UniversalObject {
     public UniversalException(String message) {
         this.message = message;
     }
+
+    public UniversalException(Throwable e) {
+        this.message = e.getMessage();
+    }
 }

@@ -1,4 +1,4 @@
-package JUOM.Web;
+package JUOM.WebServices;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;

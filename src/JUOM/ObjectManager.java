@@ -1,6 +1,6 @@
 package JUOM;
 
-import JUOM.Utils.JarChecker;
+import JUOM.WebServices.JarChecker;
 
 import java.io.*;
 import java.util.HashMap;
@@ -22,10 +22,10 @@ public class ObjectManager {
                         return;
                     }
 
-                    File dir = new File(src,"Required");
+                    File dir = new File(src,"Assets");
                     dir.mkdirs();
-                    extractRequired("/JUOM/Required/UniversalObject.js", "UniversalObject.js", dir);
-                    extractRequired("/JUOM/Required/Required.txt", "Required.java", dir);
+                    extractRequired("/JUOM/Assets/UniversalObject.js", "UniversalObject.js", dir);
+                    extractRequired("/JUOM/Assets/Assets.txt", "Assets.java", dir);
                 } else {
                     System.out.println("ERROR Not running from JAR");
                 }

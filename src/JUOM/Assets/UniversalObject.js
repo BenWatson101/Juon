@@ -17,6 +17,7 @@ export default class UniversalObject {
     }
 
     static async fetchAndUnwrap(url) {
+
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -37,6 +38,8 @@ export function wrap(obj) {
         return obj;
     } else if (obj == null) {
         return new UniversalNull();
+    } else if (typeof obj.isArray()) {
+        return new UniversalArray(obj);
     } else if (WrappingMap.has(typeof obj)) {
         WrappingMap.get(typeof obj)(obj);
     } else {
@@ -105,7 +108,7 @@ class UniversalInt extends UniversalObject {
 }
 UniversalObject.registerClass('JUOM.UniversalObjects.UniversalWrappers$UOInt', UniversalInt);
 UnWrappingMap.set('JUOM.UniversalObjects.UniversalWrappers$UOInt', (obj) => obj.value);
-WrappingMap.set('number', (value) => new UniversalInt(value));
+//WrappingMap.set('number', (value) => new UniversalInt(value));
 
 class UniversalBoolean extends UniversalObject {
     constructor(value) {
@@ -120,12 +123,16 @@ WrappingMap.set('boolean', (value) => new UniversalBoolean(value));
 class UniversalArray extends UniversalObject {
     constructor(value) {
         super();
-        this.value = value;
+        let tempArr = [];
+        for(let i = 0; i < value.length; i++) {
+            tempArr.push(wrap(value[i]));
+        }
+        this.value = tempArr;
     }
 }
 UniversalObject.registerClass('JUOM.UniversalObjects.UniversalWrappers$UOArray', UniversalArray);
 UnWrappingMap.set('JUOM.UniversalObjects.UniversalWrappers$UOArray', (obj) => obj.value);
-WrappingMap.set('array', (value) => new UniversalArray(value));
+//WrappingMap.set('array', (value) => new UniversalArray(value)); //handled in wrapping function
 
 class UniversalNull extends UniversalObject {
     constructor() {
@@ -134,7 +141,7 @@ class UniversalNull extends UniversalObject {
 }
 UniversalObject.registerClass('JUOM.UniversalObjects.UniversalWrappers$UONull', UniversalNull);
 UnWrappingMap.set('JUOM.UniversalObjects.UniversalWrappers$UONull', () => null);
-//Wrapping is already handled by the wrap function
+//Wrapping is already handled by the wrap function //prefer double for accuracy
 
 class UniversalDouble extends UniversalObject {
     constructor(value) {
@@ -154,5 +161,5 @@ class UniversalFloat extends UniversalObject {
 }
 UniversalObject.registerClass('JUOM.UniversalObjects.UniversalWrappers$UOFloat', UniversalFloat);
 UnWrappingMap.set('JUOM.UniversalObjects.UniversalWrappers$UOFloat', (obj) => obj.value);
-WrappingMap.set('number', (value) => new UniversalFloat(value));
+//WrappingMap.set('number', (value) => new UniversalFloat(value)); //prefer double for accuracy
 

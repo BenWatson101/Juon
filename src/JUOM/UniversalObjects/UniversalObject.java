@@ -1,10 +1,12 @@
 package JUOM.UniversalObjects;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import JUOM.WebServices.FileManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -75,7 +77,6 @@ public abstract class UniversalObject {
     // "field4": [1,2,3,4]
     // }
     // }
-
     //common format for a json containing only a String, int or boolean:
     // {"class":"String",
     // "value":"Hello World"
@@ -196,26 +197,21 @@ public abstract class UniversalObject {
         return this.json();
     }
 
-    protected static <T extends UniversalObject> void buildJavascript(Class<T> clazz) {
+    protected void buildJavascript() throws IOException {
         //names
-        String className = clazz.getName();
-        String simpleName = clazz.getSimpleName();
+        String className = this.getClass().getName();
+        String simpleName = this.getClass().getSimpleName();
 
         //fields
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = this.getClass().getDeclaredFields();
 
         //methods
-        ArrayList<Method> WebMethods = new ArrayList<>();
         ArrayList<Method> UniversalMethods = new ArrayList<>();
 
         //populate methods
-        for(Method method : clazz.getDeclaredMethods()) {
+        for(Method method : this.getClass().getDeclaredMethods()) {
             if(method.isAnnotationPresent(Universal.class)) {
-               if (method.getAnnotation(Universal.class).webMethod()) {
-                   WebMethods.add(method);
-               } else {
-                   UniversalMethods.add(method);
-               }
+                UniversalMethods.add(method);
             }
         }
 
@@ -227,8 +223,20 @@ public abstract class UniversalObject {
         prototypeFile.append("//--DO NOT PUT ANYTHING IN THIS--\n");
         prototypeFile.append("//--FILE AS IT WILL BE DELETED!--\n");
         prototypeFile.append("//-------------------------------\n");
-        prototypeFile.append("//\n\n\n");
+        prototypeFile.append("//\n");
+        prototypeFile.append("//-------------------------------\n");
+        prototypeFile.append("//Built using JUOM version " + JUOM.JUOM.VERSION + "\n");
+        prototypeFile.append("//-------------------------------\n");
+        prototypeFile.append("//\n");
+        prototypeFile.append("import UniversalObject from \"../Assets/UniversalObject\";\n\n\n\n");
+        prototypeFile.append("export default class ").append(simpleName).append(" extends UniversalObject {}\n\n");
 
+
+
+
+        FileManager.writeFile(
+                simpleName + "_.js",
+                prototypeFile.toString().getBytes(), this.getClass());
     }
 
 }

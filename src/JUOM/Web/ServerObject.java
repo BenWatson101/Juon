@@ -4,6 +4,7 @@ import JUOM.JHTML.JHTML;
 import JUOM.UniversalObjects.Universal;
 import JUOM.UniversalObjects.UniversalException;
 import JUOM.UniversalObjects.UniversalObject;
+import JUOM.WebServices.FileManager;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -12,22 +13,13 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static JUOM.Web.Resource.*;
+
 public abstract class ServerObject extends UniversalObject {
 
     protected ServerObject parent = null;
 
-    protected record Resource(String resource, String mime) {}
 
-    protected static Dictionary<String, String> extensionToMIME = new Hashtable<>();
-    static {
-        extensionToMIME.put("html", "text/html");
-        extensionToMIME.put("css", "text/css");
-        extensionToMIME.put("js", "application/javascript");
-        extensionToMIME.put("png", "image/png");
-        extensionToMIME.put("jpg", "image/jpeg");
-        extensionToMIME.put("gif", "image/gif");
-        extensionToMIME.put("ico", "image/x-icon");
-    }
 
     protected final String nextURLPart(String url) {
 
@@ -65,15 +57,22 @@ public abstract class ServerObject extends UniversalObject {
 
         for(int i = 0; i < splits.size(); i++) {
 
-            if(splits.get(i).equals("..")) {
-                splits.remove(i);
-                splits.remove(i - 1);
-                i -= 2;
-            } else if (splits.get(i).equals(".")) {
-                splits.remove(i);
-                i--;
-            } else {
-                splits.set(i, URLDecoder.decode(splits.get(i), StandardCharsets.UTF_8));
+            switch (splits.get(i)) {
+                case ".." -> {
+                    splits.remove(i);
+                    splits.remove(i - 1);
+                    i -= 2;
+                }
+                case "." -> {
+                    splits.remove(i);
+                    i--;
+                }
+                case "..." -> {
+                    splits.clear();
+                    splits.add("");
+                    i = -1;
+                }
+                default -> splits.set(i, URLDecoder.decode(splits.get(i), StandardCharsets.UTF_8));
             }
         }
         return String.join("/", splits);
@@ -81,7 +80,7 @@ public abstract class ServerObject extends UniversalObject {
 
 
 
-    protected final void parseParams(HTTPServer.Client c, String paramString) throws IOException {
+    protected final void parseParams(Client c, String paramString) throws IOException {
 
         try {
 
@@ -175,64 +174,23 @@ public abstract class ServerObject extends UniversalObject {
 
             //System.out.println(path);
 
-            InputStream is = this.getClass().getResourceAsStream(path);
+            byte[] bytes = FileManager.readFile(path, this.getClass());
 
-            if (is == null) {
-                return new Resource("Failed to load resource", extensionToMIME.get("json"));
+            if (bytes == null) {
+                return new Resource("Failed to load content", extensionToMIME.get("json"));
             }
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-            StringBuilder content = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-            reader.close();
-            return new Resource(content.toString(), mime);
+            return new Resource(new String(bytes, StandardCharsets.UTF_8), mime);
 
         } else {
             throw new IOException("No file extension");
         }
     }
 
-    protected final void sendResponse(HTTPServer.Client c, Resource r, int code) throws IOException {
-        c.out.write("HTTP/1.1 " + code + " OK\r\n" +
-                "Content-Type: " + r.mime() + "\r\n" +
-                "\r\n" +
-                r.resource());
-        c.out.flush();
-    }
-
-    protected final void sendPageNotFoundResponse(HTTPServer.Client c, String message) throws IOException {
-        sendHTMLResponse(c, pageNotFound(message));
-    }
-
-    protected final void sendResourceResponse(HTTPServer.Client c, Resource resource) throws IOException {
-        sendResponse(c, resource, 200);
-    }
-
-    protected final void sendHTMLResponse(HTTPServer.Client c, JHTML html) throws IOException {
-        sendResponse(c, new Resource(html.html(), "text/html"), 200);
-    }
-
-    protected final void sendUniversalResponse(HTTPServer.Client c, UniversalObject obj) throws IOException {
-        sendResponse(c, new Resource(obj.json(), "application/json"), 200);
-    }
-
-    protected final void sendExceptionFoundResponse(HTTPServer.Client c, String message) throws IOException {
-        sendUniversalResponse(c, new UniversalException(message));
-    }
-
-    protected final void sendNoResponse(HTTPServer.Client c) throws IOException {
-        sendResponse(c, new Resource("", "text/html"), 200);
-    }
-
-
 
     protected abstract JHTML pageNotFound(String message);
 
-    protected void handleURL(HTTPServer.Client c, String url) throws IOException {
+    protected void handleURL(Client c, String url) throws IOException {
         if(nextURLPart(url).isEmpty()) {
             parseParams(c, url);
         } else {

@@ -1,4 +1,4 @@
-package Required;
+package Assets;
 
 import JUOM.JHTML.JHTML;
 import JUOM.Web.ServerObject;

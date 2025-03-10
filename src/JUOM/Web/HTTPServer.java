@@ -1,5 +1,7 @@
 package JUOM.Web;
 
+import JUOM.WebServices.MonitoredThread;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +15,8 @@ public abstract class HTTPServer extends Page {
     private boolean running = true;
 
     private final Map<String, ServerObject> serverObjectMap = new HashMap<>();
+
+    private final Map<String, Runnable> HeaderToFunction = new HashMap<>();
 
     private String domainName;
 
@@ -52,25 +56,6 @@ public abstract class HTTPServer extends Page {
         running = false;
     }
 
-    public static final class Client implements AutoCloseable {
-        public final BufferedReader in;
-        public final BufferedWriter out;
-        private final Socket socket;
-
-        public Client(Socket socket) throws IOException {
-            this.socket = socket;
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        }
-
-        @Override
-        public void close() throws IOException {
-            in.close();
-            out.close();
-            socket.close();
-        }
-    }
-
     private void handleClient(Socket clientSocket) {
         try (Client client = new Client(clientSocket)) {
 
@@ -85,12 +70,17 @@ public abstract class HTTPServer extends Page {
 
                     url = processUrl(url);
 
-                    if (url.equals("/") && method.equals("GET")) {
-                        sendHTMLResponse(client, startingPage());
+                    String finalUrl = url;
 
-                    } else {
-                        handleRequest(client, requestParts[0], url);
-                    }
+                    handleRequest(client, method, finalUrl);
+
+                    addHeaderFunction("GET", () -> {
+                        try {
+                            handleRequest(client, method, finalUrl);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
 
                 } else {
                     sendPageNotFoundResponse(client, "Incorrect request format\n http request: " + line);
@@ -108,7 +98,10 @@ public abstract class HTTPServer extends Page {
             return;
         }
 
-
+        if(url.equals("/")) {
+            sendHTMLResponse(client, startingPage());
+            return;
+        }
 
 //        System.out.println("Server URL: " + url);
 //        System.out.println("Server next: " + nextURLPart(url));
@@ -148,6 +141,15 @@ public abstract class HTTPServer extends Page {
 
     public final void setDomainName(String domainName) {
         this.domainName = domainName;
+    }
+
+    public final boolean addHeaderFunction(String header, Runnable function) {
+        if(HeaderToFunction.containsKey(header)) {
+            return false;
+        }
+
+        HeaderToFunction.put(header, function);
+        return true;
     }
 
 

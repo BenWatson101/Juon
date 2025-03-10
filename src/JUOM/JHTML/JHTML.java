@@ -3,8 +3,10 @@ package JUOM.JHTML;
 import JUOM.UniversalObjects.Universal;
 import JUOM.UniversalObjects.UniversalObject;
 import JUOM.UniversalObjects.WrapMyselfUniversally;
+import JUOM.WebServices.FileManager;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public abstract class JHTML implements WrapMyselfUniversally {
 
@@ -51,25 +53,16 @@ public abstract class JHTML implements WrapMyselfUniversally {
 //        System.out.println("Relative path: " + clazz.getResourceAsStream(path));;
 //        System.out.println(clazz);
 
-        InputStream e = clazz.getResourceAsStream(path);
+        byte[] bytes = FileManager.readFile(path, clazz);
 
-        if (e == null) {
+        if (bytes == null) {
             throw new IOException("File not found");
         }
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(e));
-
-
-        String line;
-        while((line = reader.readLine()) != null) {
-            html.append(line).append("\n");
-        }
-        reader.close();
 
         return new JHTML() {
             @Override
             protected String htmlContent()  {
-                return html.toString();
+                return new String(bytes, StandardCharsets.UTF_8);
             }
         };
     }
