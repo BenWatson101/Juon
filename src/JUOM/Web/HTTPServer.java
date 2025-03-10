@@ -16,8 +16,6 @@ public abstract class HTTPServer extends Page {
 
     private final Map<String, ServerObject> serverObjectMap = new HashMap<>();
 
-    private final Map<String, Runnable> HeaderToFunction = new HashMap<>();
-
     private String domainName;
 
     public HTTPServer(int port) throws IOException {
@@ -33,9 +31,15 @@ public abstract class HTTPServer extends Page {
             while (running) {
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    new MonitoredThread(() -> handleClient(clientSocket)).start();
+                    new MonitoredThread(() -> {
+                        try (Client c = new Client(clientSocket)) {
+                            handleRequest(c, c.url());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 } catch (IOException e) {
-                    System.out.println("Accept failed: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -56,50 +60,14 @@ public abstract class HTTPServer extends Page {
         running = false;
     }
 
-    private void handleClient(Socket clientSocket) {
-        try (Client client = new Client(clientSocket)) {
+    protected void handleRequest(Client c, String url) throws IOException {
 
-            String line;
-            while (!(line = client.in.readLine()).isEmpty()) {
-
-                String[] requestParts = line.split(" ");
-
-                if (requestParts.length >= 2) {
-                    String url = requestParts[1];
-                    String method = requestParts[0];
-
-                    url = processUrl(url);
-
-                    String finalUrl = url;
-
-                    handleRequest(client, method, finalUrl);
-
-                    addHeaderFunction("GET", () -> {
-                        try {
-                            handleRequest(client, method, finalUrl);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-                } else {
-                    sendPageNotFoundResponse(client, "Incorrect request format\n http request: " + line);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Client connection error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    protected void handleRequest(Client client, String method, String url) throws IOException {
-
-        if(!method.equals("GET")) {
+        if(!c.getHeader("Method")[0].equals("GET")) {
             return;
         }
 
         if(url.equals("/")) {
-            sendHTMLResponse(client, startingPage());
+            c.setResponse(startingPage());
             return;
         }
 
@@ -113,18 +81,10 @@ public abstract class HTTPServer extends Page {
         ServerObject obj = serverObjectMap.get(nextURLPart(url));
 
         if(obj != null) {
-            obj.handleURL(client, truncateUrL(url));
-
-        } else if(url.contains("?")) {
-            handleURL(client, truncateUrL(url));
+            obj.handleURL(c, truncateUrL(url));
 
         } else {
-
-            try {
-                sendResourceResponse(client, handleResource(url));
-            } catch (IOException e) {
-                sendPageNotFoundResponse(client, "File not found!!!!!!!!!!!");
-            }
+            super.handleURL(c, url);
         }
     }
 
@@ -141,15 +101,6 @@ public abstract class HTTPServer extends Page {
 
     public final void setDomainName(String domainName) {
         this.domainName = domainName;
-    }
-
-    public final boolean addHeaderFunction(String header, Runnable function) {
-        if(HeaderToFunction.containsKey(header)) {
-            return false;
-        }
-
-        HeaderToFunction.put(header, function);
-        return true;
     }
 
 

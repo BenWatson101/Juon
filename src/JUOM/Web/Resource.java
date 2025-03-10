@@ -15,6 +15,7 @@ public record Resource(String content, String mime) {
         extensionToMIME.put("jpg", "image/jpeg");
         extensionToMIME.put("gif", "image/gif");
         extensionToMIME.put("ico", "image/x-icon");
+        extensionToMIME.put("json", "application/json");
     }
 
     public Resource {

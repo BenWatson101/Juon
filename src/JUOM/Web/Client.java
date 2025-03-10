@@ -158,5 +158,15 @@ public final class Client implements AutoCloseable {
         setResponse((UniversalObject) e);
     }
 
+    public void setResponse(byte[] content) {
+        setResponseHeaders("Content-Type", "application/octet-stream");
+        this.content = new String(content);
+    }
+
+    public void setResponse(Resource resource) {
+        setResponseHeaders("Content-Type", resource.mime());
+        this.content = resource.content();
+    }
+
 
 }

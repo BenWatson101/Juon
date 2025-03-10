@@ -17,7 +17,7 @@ public abstract class Page extends ServerObject {
     protected void handleURL(Client c, String url) throws IOException {
 
         if(url.equals("/")) {
-            sendHTMLResponse(c, startingPage());
+            c.setResponse(startingPage());
         } else {
             super.handleURL(c, url);
         }

@@ -111,7 +111,7 @@ public abstract class ServerObject extends UniversalObject {
                         && constructor.getAnnotation(Universal.class).webMethod()) {
 
                         try {
-                            sendUniversalResponse(c, (UniversalObject) constructor.newInstance(objects));
+                            c.setResponse((UniversalObject) constructor.newInstance(objects));
                             return;
                         } catch (Exception ignored) {}
                     }
@@ -125,19 +125,19 @@ public abstract class ServerObject extends UniversalObject {
 
                         try {
                             method.setAccessible(true);
-                            sendUniversalResponse(c, UniversalObject.convert(method.invoke(this, objects)));
+                            c.setResponse(UniversalObject.convert(method.invoke(this, objects)));
                             return;
                         } catch (Exception ignored) {}
                     }
                 }
             }
 
-            sendExceptionFoundResponse(c, "Method called " + paramsAndName[0] +  "() for page "
-                    + this.getClass().getName() + " not found");
+            c.setResponse(new UniversalException("Method called " + paramsAndName[0] +  "() for page "
+                    + this.getClass().getName() + " not found"));
 
         } catch (Exception e) {
-            sendExceptionFoundResponse(c, "Invalid parameters when executing page methods for page "
-                    + this.getClass().getName() + ": " + e.getMessage());
+            c.setResponse(new UniversalException("Invalid parameters when executing page methods for page "
+                    + this.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
@@ -188,16 +188,18 @@ public abstract class ServerObject extends UniversalObject {
     }
 
 
-    protected abstract JHTML pageNotFound(String message);
+    protected abstract JHTML objectOrResourceNotFound(String message);
 
     protected void handleURL(Client c, String url) throws IOException {
         if(nextURLPart(url).isEmpty()) {
             parseParams(c, url);
         } else {
             try {
-                sendResourceResponse(c, handleResource(url));
+                c.setResponse(handleResource(url));
             } catch (IOException e) {
-                sendPageNotFoundResponse(c, "File not found");
+                c.setResponseCode(404);
+                c.setResponseMessage(e.getMessage());
+                c.setResponse(objectOrResourceNotFound(e.getMessage()));
             }
         }
     }
