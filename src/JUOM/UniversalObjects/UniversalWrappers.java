@@ -42,7 +42,7 @@ public class UniversalWrappers {
         public UniversalObject[] value;
 
         public UOArray(UniversalObject[] value) {
-            this.value = value;
+            this.value = java.util.Arrays.copyOf(value, value.length);
         }
     }
 

@@ -27,6 +27,7 @@ public abstract class HTTPServer extends Page {
     public final void start() {
         running = true;
 
+
         new MonitoredThread(() -> {
             while (running) {
                 try {
@@ -94,12 +95,12 @@ public abstract class HTTPServer extends Page {
         return domainName + "/";
     }
 
-    public final void addServerObject(ServerObject obj) {
+    protected final void addServerObject(ServerObject obj) {
         serverObjectMap.put(obj.getClass().getSimpleName(), obj);
         obj.parent = this;
     }
 
-    public final void setDomainName(String domainName) {
+    protected final void setDomainName(String domainName) {
         this.domainName = domainName;
     }
 

@@ -3,6 +3,7 @@ package JUOM.UniversalObjects;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -231,8 +232,22 @@ public abstract class UniversalObject {
         prototypeFile.append("import UniversalObject from \"../Assets/UniversalObject\";\n\n\n\n");
         prototypeFile.append("export default class ").append(simpleName).append(" extends UniversalObject {}\n\n");
 
+        prototypeFile.append("//Declaring fields\n");
+        for(Field field : fields) {
+            prototypeFile.append(simpleName).append(".prototype.").append(field.getName()).append(" = null;\n");
+        }
+        prototypeFile.append("\n\n\n\n\n");
 
+        prototypeFile.append("//Declaring methods\n\n");
+        for(Method method: UniversalMethods) {
+            prototypeFile.append(simpleName).append(".prototype.").append(method.getName()).append(" = function(");
+            prototypeFile.append(Arrays.stream(method.getParameters()).map(Parameter::getName).reduce((a, b) -> a + ", " + b).orElse(""));
+            prototypeFile.append(") {\n");
+            prototypeFile.append("    throw new Error(\"Method not implemented.\")\n");
+            prototypeFile.append("};\n");
 
+        }
+        prototypeFile.append("\n\n\n");
 
         FileManager.writeFile(
                 simpleName + "_.js",
