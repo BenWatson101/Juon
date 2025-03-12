@@ -4,6 +4,7 @@ import JUOM.JHTML.JHTML;
 import JUOM.UniversalObjects.Universal;
 import JUOM.UniversalObjects.UniversalException;
 import JUOM.UniversalObjects.UniversalObject;
+import JUOM.UniversalObjects.WebMethod;
 import JUOM.WebServices.FileManager;
 
 import java.io.*;
@@ -107,8 +108,7 @@ public abstract class ServerObject extends UniversalObject {
                 Constructor<?>[] constructors = this.getClass().getConstructors();
                 for (Constructor<?> constructor : constructors) {
                     if(constructor.getParameterCount() == objects.length
-                        && constructor.isAnnotationPresent(Universal.class)
-                        && constructor.getAnnotation(Universal.class).webMethod()) {
+                        && constructor.isAnnotationPresent(WebMethod.class)) {
 
                         try {
                             c.setResponse((UniversalObject) constructor.newInstance(objects));
@@ -120,8 +120,7 @@ public abstract class ServerObject extends UniversalObject {
                 for (Method method : this.getClass().getDeclaredMethods()) {
                     if (method.getName().equals(methodName)
                         && method.getParameterCount() == objects.length
-                        && method.isAnnotationPresent(Universal.class)
-                        && method.getAnnotation(Universal.class).webMethod()) {
+                        && method.isAnnotationPresent(WebMethod.class)) {
 
                         try {
                             method.setAccessible(true);
