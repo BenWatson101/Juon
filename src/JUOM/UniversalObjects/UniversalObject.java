@@ -14,7 +14,12 @@ import com.google.gson.JsonParser;
 
 // Anything that extends this class can be handed to client as an object
 // which can be used
-public abstract class UniversalObject {
+public abstract class UniversalObject implements WrapMyselfUniversally{
+
+    @Override
+    public final UniversalObject wrapMyself() {
+        return this;
+    }
 
     public final String json() {
         StringBuilder json = new StringBuilder("{");
@@ -138,9 +143,7 @@ public abstract class UniversalObject {
     }
 
     public static UniversalObject convert(Object o) throws IllegalArgumentException {
-        if(o instanceof UniversalObject uo) {
-            return uo;
-        } else if (o instanceof WrapMyselfUniversally) {
+        if (o instanceof WrapMyselfUniversally) {
             return ((WrapMyselfUniversally) o).wrapMyself();
         } else if(o == null) {
             return new UniversalWrappers.UONull();
